@@ -185,15 +185,15 @@ def finetune(sess,
     if accumulate_gradients > 1:
         if use_memory_saving_gradients:
             exit("Memory saving gradients are not implemented for gradient accumulation yet.")
-        opt = AccumulatingOptimizer(
+        opt = tf.compat.v1.train.experimental.enable_mixed_precision_graph_rewrite(AccumulatingOptimizer(
             opt=tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate),
-            var_list=train_vars)
+            var_list=train_vars))
         opt_reset = opt.reset()
         opt_compute = opt.compute_gradients(loss)
         opt_apply = opt.apply_gradients()
         summary_loss = tf.compat.v1.summary.scalar('loss', opt_apply)
     else:
-        opt = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
+        opt = tf.compat.v1.train.experimental.enable_mixed_precision_graph_rewrite(tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate))
         if use_memory_saving_gradients:
             opt_grads = memory_saving_gradients.gradients(loss, train_vars)
         else:
